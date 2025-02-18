@@ -14,10 +14,10 @@ export interface UploadedFile {
 
 export async function uploadFileToStorage(file: File): Promise<UploadedFile> {
   const fileExt = file.name.split(".").pop();
-  const fileName = `${Math.random()}.${fileExt}`;
+  const fileName = `${Math.random().toString(36).substring(2, 20)}.${fileExt}`;
   const filePath = `${fileName}`;
 
-  const { error: uploadError, data } = await supabase.storage
+  const { error: uploadError } = await supabase.storage
     .from("files")
     .upload(filePath, file, {
       cacheControl: "3600",

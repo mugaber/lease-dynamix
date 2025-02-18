@@ -1,22 +1,28 @@
 import { useRef, useEffect, useState } from "react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
-import { Maximize2, Minimize2 } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface EditorProps {
   initialContent: string;
   onChange: (content: string) => void;
+  onClose?: () => void;
+  isFullPage?: boolean;
 }
 
 // TODO: Make the UI nicer
 // TODO: Save the changes to the file and Add a Save button
-// TODO: Open a dedicated page for the editor
+// TODO: Do a line through Changed terms and highlight the new ones
 
-export function Editor({ initialContent, onChange }: EditorProps) {
+export function Editor({
+  initialContent,
+  onChange,
+  onClose,
+  isFullPage,
+}: EditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const quillRef = useRef<Quill | null>(null);
-  const [isFullScreen, setIsFullScreen] = useState(false);
 
   useEffect(() => {
     if (editorRef.current && !quillRef.current) {
@@ -47,10 +53,8 @@ export function Editor({ initialContent, onChange }: EditorProps) {
   return (
     <div className="w-full">
       <div
-        className={`${
-          isFullScreen
-            ? "fixed inset-0 z-50 bg-white"
-            : "relative w-full h-[calc(100vh-4rem)] bg-white"
+        className={`w-full bg-white ${
+          isFullPage ? "h-[calc(100dvh-4.4rem)]" : "h-[calc(80vh)]"
         }`}
       >
         <style jsx global>{`
@@ -88,7 +92,9 @@ export function Editor({ initialContent, onChange }: EditorProps) {
           }
           .ql-editor {
             height: 100%;
-            padding: 24px;
+            margin: 0 auto;
+            padding: 30px 60px;
+            ${isFullPage ? "max-width: 850px;" : ""}
           }
           .ql-picker {
             height: 28px;
@@ -104,20 +110,18 @@ export function Editor({ initialContent, onChange }: EditorProps) {
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           }
         `}</style>
-        <div className="absolute right-4 top-2 z-40">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="cursor-pointer relative bottom-1"
-            onClick={() => setIsFullScreen(!isFullScreen)}
-          >
-            {isFullScreen ? (
-              <Minimize2 className="h-4 w-4" />
-            ) : (
-              <Maximize2 className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
+        {onClose && (
+          <div className="absolute right-4 top-4 z-40">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="cursor-pointer"
+              onClick={onClose}
+            >
+              <X className="h-6 w-6" />
+            </Button>
+          </div>
+        )}
         <div ref={editorRef} className="h-full" />
       </div>
     </div>

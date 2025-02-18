@@ -5,7 +5,7 @@ import { useDropzone } from "react-dropzone";
 import { Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { uploadFileToStorage, saveFileMetadata } from "@/lib/services/files";
-import { Editor } from "./editor";
+import { Editor } from "../../../../components/shared/editor";
 import mammoth from "mammoth";
 interface FileUploadProps {
   onUploadComplete?: () => void;
@@ -30,10 +30,10 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
         const result = await mammoth.convertToHtml({ arrayBuffer });
         setUploadedContent({ content: result.value, path: uploadedFile.path });
 
-        toast.success("Files uploaded successfully");
+        toast.success("File uploaded successfully");
       } catch (error) {
         console.error("Upload error:", error);
-        toast.error("Failed to upload files");
+        toast.error("Failed to upload file");
       } finally {
         setIsUploading(false);
         onUploadComplete?.();
@@ -78,12 +78,12 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
       {isUploading ? (
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p>Uploading files...</p>
+          <p>Uploading file...</p>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-2">
           <Upload className="h-8 w-8 text-gray-500" />
-          <p>Drag & drop files here, or click to select files</p>
+          <p>Drag & drop file here, or click to select file</p>
           <p className="text-sm text-muted-foreground">
             Supported files: PDF, DOC, DOCX, TXT
           </p>

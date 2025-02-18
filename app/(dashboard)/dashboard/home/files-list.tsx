@@ -11,12 +11,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
-import { Loader2, Trash2, File, Edit } from "lucide-react";
-import { Editor } from "./editor";
+import { Loader2, Trash2, File, Edit, ArrowUpRight } from "lucide-react";
+import { Editor } from "../../../../components/shared/editor";
 import { toast } from "sonner";
 import mammoth from "mammoth";
 import { getFile } from "@/lib/services/files";
-
+import { useRouter } from "next/navigation";
 interface FileItem {
   id: string;
   name: string;
@@ -26,6 +26,7 @@ interface FileItem {
 }
 
 export function FilesList() {
+  const router = useRouter();
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -56,11 +57,36 @@ export function FilesList() {
         body: JSON.stringify({ path: filePath, id }),
       });
       setFiles(files.filter((file) => file.id !== id));
+      toast.success("File deleted successfully");
     } catch (error) {
-      console.error("Error deleting file:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Error deleting file";
+      console.error("Error deleting file:", errorMessage);
+      toast.error(errorMessage);
     } finally {
       setDeleting(null);
     }
+  };
+
+  const handleEdit = async (filePath: string) => {
+    try {
+      const blob = await getFile(filePath);
+      if (blob) {
+        const result = await mammoth.convertToHtml({
+          arrayBuffer: await blob.arrayBuffer(),
+        });
+
+        setFileContent(result.value);
+        setSelectedFile(filePath);
+      }
+    } catch (error) {
+      console.error("Error loading file:", error);
+      toast.error("Failed to load file");
+    }
+  };
+
+  const handleEditFullPage = async (filePath: string) => {
+    router.push(`/editor?filePath=${filePath}`);
   };
 
   const formatFileSize = (bytes: number) => {
@@ -94,22 +120,6 @@ export function FilesList() {
       </div>
     );
   }
-
-  const handleEdit = async (filePath: string) => {
-    try {
-      const blob = await getFile(filePath);
-      if (blob) {
-        const result = await mammoth.convertToHtml({
-          arrayBuffer: await blob.arrayBuffer(),
-        });
-        setFileContent(result.value);
-        setSelectedFile(filePath);
-      }
-    } catch (error) {
-      console.error("Error loading file:", error);
-      toast.error("Failed to load file");
-    }
-  };
 
   if (fileContent && selectedFile) {
     return (
@@ -147,9 +157,17 @@ export function FilesList() {
                     variant="ghost"
                     size="icon"
                     className="cursor-pointer"
+                    onClick={() => handleEditFullPage(file.path)}
+                  >
+                    <ArrowUpRight className="h-4 w-4 hover:text-orange-500" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="cursor-pointer"
                     onClick={() => handleEdit(file.path)}
                   >
-                    <Edit className="h-4 w-4" />
+                    <Edit className="h-4 w-4 hover:text-green-500" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -161,7 +179,7 @@ export function FilesList() {
                     {deleting === file.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Trash2 className="h-4 w-4 text-destructive" />
+                      <Trash2 className="h-4 w-4 text-destructive hover:text-red-600" />
                     )}
                   </Button>
                 </div>

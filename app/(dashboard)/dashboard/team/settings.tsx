@@ -47,7 +47,11 @@ export function Settings({ teamData }: { teamData: TeamDataWithMembers }) {
                 </p>
               </div>
               <form action={customerPortalAction}>
-                <Button type="submit" variant="outline">
+                <Button
+                  type="submit"
+                  variant="outline"
+                  className="cursor-pointer"
+                >
                   Manage Subscription
                 </Button>
               </form>

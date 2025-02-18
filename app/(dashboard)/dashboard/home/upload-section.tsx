@@ -8,8 +8,6 @@ import { FileUpload } from "./file-upload";
 export function UploadSection() {
   const [isUploadZoneVisible, setIsUploadZoneVisible] = useState(false);
 
-  // onUploadComplete={() => setIsUploadZoneVisible(false)}
-
   return (
     <>
       <div className="flex items-center justify-between mb-4">
