@@ -1,0 +1,6 @@
+- Make the Editor UI nicer
+- Add Navigation sidebar to the Editor
+- Add Comparable Terms UI to the Editor
+- Integrate ChatGPT API to the Editor
+- Save the changes to the file and Add a Save button
+- Do a line through Changed terms and highlight the new ones

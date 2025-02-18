@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { Loader2, Trash2, File, Edit, ArrowUpRight } from "lucide-react";
-import { Editor } from "../../../../components/shared/editor";
+import { Editor } from "@/components/shared/editor";
 import { toast } from "sonner";
 import mammoth from "mammoth";
 import { getFile } from "@/lib/services/files";

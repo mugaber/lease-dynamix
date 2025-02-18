@@ -1,13 +1,25 @@
 "use client";
 
-import { Editor } from "@/components/shared/editor";
 import { getFile } from "@/lib/services/files";
 import { Loader2 } from "lucide-react";
 import mammoth from "mammoth";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
-export default function EditorPage() {
+const Editor = dynamic(
+  () => import("@/components/shared/editor").then((mod) => mod.Editor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex w-full h-full items-center justify-center p-8">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    ),
+  }
+);
+
+function EditorPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const filePath = searchParams.get("filePath") || "";
@@ -71,5 +83,19 @@ export default function EditorPage() {
       onClose={() => router.back()}
       isFullPage
     />
+  );
+}
+
+export default function EditorPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex w-full h-full items-center justify-center p-8">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      }
+    >
+      <EditorPageContent />
+    </Suspense>
   );
 }

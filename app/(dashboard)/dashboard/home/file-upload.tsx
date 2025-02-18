@@ -5,11 +5,19 @@ import { useDropzone } from "react-dropzone";
 import { Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { uploadFileToStorage, saveFileMetadata } from "@/lib/services/files";
-import { Editor } from "../../../../components/shared/editor";
 import mammoth from "mammoth";
+import dynamic from "next/dynamic";
+
 interface FileUploadProps {
   onUploadComplete?: () => void;
 }
+
+const Editor = dynamic(
+  () => import("@/components/shared/editor").then((mod) => mod.Editor),
+  {
+    ssr: false,
+  }
+);
 
 export function FileUpload({ onUploadComplete }: FileUploadProps) {
   const [isUploading, setIsUploading] = useState(false);

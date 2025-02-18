@@ -1,8 +1,19 @@
-import { useRef, useEffect, useState } from "react";
+"use client";
+
+import { useRef, useEffect } from "react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const toolbarOptions = [
+  [{ header: [1, 2, 3, false] }],
+  [{ font: [] }],
+  ["bold", "italic", "underline"],
+  [{ list: "ordered" }, { list: "bullet" }],
+  ["link", "image", "code-block"],
+  ["clean"],
+];
 
 interface EditorProps {
   initialContent: string;
@@ -10,10 +21,6 @@ interface EditorProps {
   onClose?: () => void;
   isFullPage?: boolean;
 }
-
-// TODO: Make the UI nicer
-// TODO: Save the changes to the file and Add a Save button
-// TODO: Do a line through Changed terms and highlight the new ones
 
 export function Editor({
   initialContent,
@@ -26,15 +33,6 @@ export function Editor({
 
   useEffect(() => {
     if (editorRef.current && !quillRef.current) {
-      const toolbarOptions = [
-        [{ header: [1, 2, 3, false] }],
-        [{ font: [] }],
-        ["bold", "italic", "underline"],
-        [{ list: "ordered" }, { list: "bullet" }],
-        ["link", "image", "code-block"],
-        ["clean"],
-      ];
-
       quillRef.current = new Quill(editorRef.current, {
         theme: "snow",
         modules: {
@@ -110,18 +108,6 @@ export function Editor({
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           }
         `}</style>
-        {onClose && (
-          <div className="absolute right-4 top-4 z-40">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="cursor-pointer"
-              onClick={onClose}
-            >
-              <X className="h-6 w-6" />
-            </Button>
-          </div>
-        )}
         <div ref={editorRef} className="h-full" />
       </div>
     </div>
