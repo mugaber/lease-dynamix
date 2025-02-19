@@ -15,17 +15,17 @@ const toolbarOptions = [
   [{ list: "ordered" }, { list: "bullet" }],
   [{ indent: "-1" }, { indent: "+1" }],
   [{ direction: "rtl" }, { align: [] }],
-  ["link", "image", "video", "formula"],
+  ["link", "image"],
   ["clean"],
+  ["pageBreak"],
 ];
 
 interface EditorProps {
   initialContent: string;
   onChange: (content: string) => void;
-  isFullPage?: boolean;
 }
 
-export function Editor({ initialContent, onChange, isFullPage }: EditorProps) {
+export function Editor({ initialContent, onChange }: EditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const quillRef = useRef<Quill | null>(null);
 
@@ -47,76 +47,83 @@ export function Editor({ initialContent, onChange, isFullPage }: EditorProps) {
   }, [onChange, initialContent]);
 
   return (
-    <div className="w-full">
-      <div
-        className={`w-full bg-white ${
-          isFullPage ? "h-[calc(100dvh-4.4rem)]" : "h-[calc(80vh)]"
-        }`}
-      >
+    <div className="w-full h-[calc(100dvh-6.8rem)]">
+      <div className="w-full h-full bg-white">
         <style jsx global>{`
+          .ql-container {
+            border: none;
+          }
+
+          .ql-editor {
+            width: 816px;
+            height: 97% !important;
+            margin: 1rem auto;
+            padding: 60px !important;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+          }
+
+          .ql-editor p {
+            font-size: 16px;
+          }
+
           .ql-toolbar {
             position: sticky;
             top: 0;
             z-index: 30;
-            background: white;
-            border: none;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 8px 16px;
-            display: flex;
-            justify-content: center;
-          }
-          .ql-toolbar .ql-formats {
-            margin-right: 15px;
-          }
-          .ql-toolbar button {
-            width: 28px;
-            height: 28px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-          }
-          .ql-toolbar button:hover {
-            color: #000;
-          }
-          .ql-toolbar .ql-active {
-            color: #0066ff;
-          }
-          .ql-container {
-            border: none;
-            font-size: 16px;
-            height: calc(100% - 65px);
-          }
-          .ql-editor {
-            height: 100%;
             margin: 0 auto;
-            padding: 30px 60px;
-            ${isFullPage ? "max-width: 850px;" : ""}
-          }
-          .ql-picker {
-            height: 28px;
-          }
-          .ql-picker-label {
-            padding: 0 8px;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-          }
-          .ql-picker-options {
-            border-radius: 4px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          }
-          .ql-editor .page-break {
-            padding: 0;
-            margin: 1rem 0;
-            border-top: 1px dashed #ccc;
-            page-break-after: always;
+            border: none !important;
+            border-bottom: 1px solid #e5e7eb !important;
+            background: white;
+            padding: 8px 15px !important;
           }
 
-          .ql-editor p {
-            margin-bottom: 1em;
+          .ql-container.ql-snow {
+            background: #f0f3f4;
+            height: 100%;
+            overflow-y: auto;
+          }
+
+          .page-break {
+            width: 816px;
+            margin: 1rem auto;
+            border-top: 1px dashed #ccc;
+            position: relative;
+          }
+
+          /* Hide scrollbars */
+
+          body,
+          html {
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+          }
+
+          body::-webkit-scrollbar,
+          html::-webkit-scrollbar {
+            display: none;
+          }
+
+          .ql-container.ql-snow::-webkit-scrollbar {
+            display: none;
+          }
+
+          .ql-container.ql-snow {
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+          }
+
+          .ql-editor::-webkit-scrollbar {
+            display: none;
+          }
+
+          .ql-editor {
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
           }
         `}</style>
-        <div ref={editorRef} className="h-full" />
+        <div ref={editorRef} className="h-full overflow-hidden" />
       </div>
     </div>
   );

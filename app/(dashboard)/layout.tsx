@@ -13,7 +13,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/lib/auth";
 import { signOut } from "@/app/(login)/actions";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { User } from "@/lib/db/schema";
 
 function Header() {
@@ -97,9 +97,12 @@ function Header() {
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const hideHeader = pathname.includes("editor");
+
   return (
     <section className="flex flex-col min-h-screen">
-      <Header />
+      {!hideHeader && <Header />}
       {children}
     </section>
   );

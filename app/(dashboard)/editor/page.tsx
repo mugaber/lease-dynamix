@@ -1,7 +1,7 @@
 "use client";
 
 import { getFile } from "@/lib/services/files";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { renderAsync } from "docx-preview";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -27,6 +27,8 @@ function EditorPageContent() {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const saveContent = async () => {};
 
   useEffect(() => {
     if (!filePath) return;
@@ -87,7 +89,7 @@ function EditorPageContent() {
   }
 
   if (!filePath) {
-    router.push("/dashboard");
+    router.push("/dashboard/home");
     return;
   }
 
@@ -101,11 +103,64 @@ function EditorPageContent() {
   }
 
   return (
-    <Editor
-      initialContent={content}
-      onChange={(content) => console.log(content)}
-      isFullPage
-    />
+    <div className="flex flex-col h-[100dvh]">
+      <header className="flex items-center px-4 py-1 border-b gap-2">
+        <div className="flex items-center gap-4 flex-1">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => router.push("/dashboard/home")}
+              className="p-2 hover:bg-gray-100 rounded-full cursor-pointer"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div className="flex flex-col">
+              <input
+                type="text"
+                value={filePath.split("/").pop() || "Untitled document"}
+                className={`font-medium text-lg bg-transparent border-b border-transparent 
+                  hover:border-gray-300 focus:border-gray-400 focus:outline-none px-1 w-fit`}
+                readOnly
+              />
+              <div className="flex gap-3 text-sm">
+                <button className="hover:bg-gray-100 px-2 py-1 rounded cursor-pointer">
+                  File
+                </button>
+                <button className="hover:bg-gray-100 px-2 py-1 rounded cursor-pointer">
+                  Edit
+                </button>
+                <button className="hover:bg-gray-100 px-2 py-1 rounded cursor-pointer">
+                  View
+                </button>
+                <button className="hover:bg-gray-100 px-2 py-1 rounded cursor-pointer">
+                  Insert
+                </button>
+                <button className="hover:bg-gray-100 px-2 py-1 rounded cursor-pointer">
+                  Format
+                </button>
+                <button className="hover:bg-gray-100 px-2 py-1 rounded cursor-pointer">
+                  Tools
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center">
+          <button
+            onClick={saveContent}
+            className="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm hover:bg-blue-700"
+          >
+            Save
+          </button>
+        </div>
+      </header>
+      <div className="relative flex-1">
+        <Editor
+          initialContent={content}
+          onChange={(content) => console.log(content)}
+        />
+      </div>
+    </div>
   );
 }
 
