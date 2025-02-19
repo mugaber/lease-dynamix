@@ -5,26 +5,13 @@ import { useDropzone } from "react-dropzone";
 import { Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { uploadFileToStorage, saveFileMetadata } from "@/lib/services/files";
-import mammoth from "mammoth";
-import dynamic from "next/dynamic";
 
 interface FileUploadProps {
   onUploadComplete?: () => void;
 }
 
-const Editor = dynamic(
-  () => import("@/components/shared/editor").then((mod) => mod.Editor),
-  {
-    ssr: false,
-  }
-);
-
 export function FileUpload({ onUploadComplete }: FileUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadedContent, setUploadedContent] = useState<{
-    content: string;
-    path: string;
-  }>({ content: "", path: "" });
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -33,10 +20,6 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
         const file = acceptedFiles[0];
         const uploadedFile = await uploadFileToStorage(file);
         await saveFileMetadata(uploadedFile);
-
-        const arrayBuffer = await file.arrayBuffer();
-        const result = await mammoth.convertToHtml({ arrayBuffer });
-        setUploadedContent({ content: result.value, path: uploadedFile.path });
 
         toast.success("File uploaded successfully");
       } catch (error) {
@@ -62,15 +45,6 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
       "text/plain": [".txt"],
     },
   });
-
-  if (uploadedContent.content) {
-    return (
-      <Editor
-        initialContent={uploadedContent.content}
-        onChange={(content) => console.log("Content changed:", content)}
-      />
-    );
-  }
 
   return (
     <div

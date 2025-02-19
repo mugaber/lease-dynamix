@@ -3,8 +3,6 @@
 import { useRef, useEffect } from "react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
-import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const toolbarOptions = [
   [{ header: [1, 2, 3, false] }],
@@ -18,16 +16,10 @@ const toolbarOptions = [
 interface EditorProps {
   initialContent: string;
   onChange: (content: string) => void;
-  onClose?: () => void;
   isFullPage?: boolean;
 }
 
-export function Editor({
-  initialContent,
-  onChange,
-  onClose,
-  isFullPage,
-}: EditorProps) {
+export function Editor({ initialContent, onChange, isFullPage }: EditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const quillRef = useRef<Quill | null>(null);
 

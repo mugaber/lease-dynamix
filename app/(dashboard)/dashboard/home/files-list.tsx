@@ -11,11 +11,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
-import { Loader2, Trash2, File, Edit, ArrowUpRight } from "lucide-react";
-import { Editor } from "@/components/shared/editor";
+import { Loader2, Trash2, File, ArrowUpRight } from "lucide-react";
 import { toast } from "sonner";
-import mammoth from "mammoth";
-import { getFile } from "@/lib/services/files";
 import { useRouter } from "next/navigation";
 interface FileItem {
   id: string;
@@ -30,8 +27,6 @@ export function FilesList() {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [fileContent, setFileContent] = useState<string | null>(null);
 
   useEffect(() => {
     fetchFiles();
@@ -65,23 +60,6 @@ export function FilesList() {
       toast.error(errorMessage);
     } finally {
       setDeleting(null);
-    }
-  };
-
-  const handleEdit = async (filePath: string) => {
-    try {
-      const blob = await getFile(filePath);
-      if (blob) {
-        const result = await mammoth.convertToHtml({
-          arrayBuffer: await blob.arrayBuffer(),
-        });
-
-        setFileContent(result.value);
-        setSelectedFile(filePath);
-      }
-    } catch (error) {
-      console.error("Error loading file:", error);
-      toast.error("Failed to load file");
     }
   };
 
@@ -121,15 +99,6 @@ export function FilesList() {
     );
   }
 
-  if (fileContent && selectedFile) {
-    return (
-      <Editor
-        initialContent={fileContent}
-        onChange={(content) => console.log("Content changed:", content)}
-      />
-    );
-  }
-
   return (
     <div className="rounded-md border">
       <Table>
@@ -159,24 +128,17 @@ export function FilesList() {
                     className="cursor-pointer"
                     onClick={() => handleEditFullPage(file.path)}
                   >
-                    <ArrowUpRight className="h-4 w-4 hover:text-orange-500" />
+                    <ArrowUpRight className="h-4 w-4 hover:text-blue-500" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="cursor-pointer"
-                    onClick={() => handleEdit(file.path)}
-                  >
-                    <Edit className="h-4 w-4 hover:text-green-500" />
-                  </Button>
+
                   <Button
                     variant="ghost"
                     size="icon"
                     className="cursor-pointer"
                     onClick={() => handleDelete(file.path, file.id)}
-                    disabled={deleting === file.id}
+                    disabled={!!deleting}
                   >
-                    {deleting === file.id ? (
+                    {deleting === file.path ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <Trash2 className="h-4 w-4 text-destructive hover:text-red-600" />

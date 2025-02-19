@@ -80,7 +80,6 @@ function EditorPageContent() {
     <Editor
       initialContent={content}
       onChange={(content) => console.log(content)}
-      onClose={() => router.back()}
       isFullPage
     />
   );
