@@ -2,7 +2,7 @@
 
 import { getFile } from "@/lib/services/files";
 import { Loader2 } from "lucide-react";
-import mammoth from "mammoth";
+import { renderAsync } from "docx-preview";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -35,13 +35,37 @@ function EditorPageContent() {
       setLoading(true);
       try {
         const contentBlob = await getFile(filePath);
-        if (contentBlob) {
-          const result = await mammoth.convertToHtml({
-            arrayBuffer: await contentBlob.arrayBuffer(),
-          });
+        console.log(contentBlob);
+        if (!contentBlob) return;
 
-          setContent(result.value);
-        }
+        const tempDiv = document.createElement("div");
+
+        await renderAsync(await contentBlob.arrayBuffer(), tempDiv, undefined, {
+          inWrapper: false,
+          ignoreWidth: true,
+          ignoreHeight: true,
+          renderHeaders: true,
+          renderFooters: true,
+          renderFootnotes: true,
+        });
+
+        const pages = Array.from(tempDiv.querySelectorAll("section.docx"));
+        const processedContent = pages
+          .map((page) => {
+            const paragraphs = Array.from(page.querySelectorAll("article p"))
+              .map((p) => p.innerHTML)
+              .join("</p><p>");
+            return `<p>${paragraphs}</p>`;
+          })
+          .join('<p class="page-break"><br></p>');
+
+        const cleanedContent = processedContent
+          .replace(/<span>/g, "")
+          .replace(/<\/span>/g, "")
+          .replace(/<p><\/p>/g, "<p><br></p>")
+          .replace(/(<br>){3,}/g, "<br><br>");
+
+        setContent(cleanedContent);
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";

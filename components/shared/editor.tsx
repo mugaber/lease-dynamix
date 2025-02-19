@@ -3,13 +3,19 @@
 import { useRef, useEffect } from "react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
+import "highlight.js/styles/atom-one-dark.css";
+import "katex/dist/katex.min.css";
 
 const toolbarOptions = [
-  [{ header: [1, 2, 3, false] }],
-  [{ font: [] }],
-  ["bold", "italic", "underline"],
+  [{ font: [] }, { size: [] }],
+  ["bold", "italic", "underline", "strike"],
+  [{ color: [] }, { background: [] }],
+  [{ script: "sub" }, { script: "super" }],
+  ["blockquote", "code-block"],
   [{ list: "ordered" }, { list: "bullet" }],
-  ["link", "image", "code-block"],
+  [{ indent: "-1" }, { indent: "+1" }],
+  [{ direction: "rtl" }, { align: [] }],
+  ["link", "image", "video", "formula"],
   ["clean"],
 ];
 
@@ -98,6 +104,16 @@ export function Editor({ initialContent, onChange, isFullPage }: EditorProps) {
             border-radius: 4px;
             border: 1px solid #e5e7eb;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          }
+          .ql-editor .page-break {
+            padding: 0;
+            margin: 1rem 0;
+            border-top: 1px dashed #ccc;
+            page-break-after: always;
+          }
+
+          .ql-editor p {
+            margin-bottom: 1em;
           }
         `}</style>
         <div ref={editorRef} className="h-full" />
