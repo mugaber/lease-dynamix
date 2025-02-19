@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { customerPortalAction } from "@/lib/payments/actions";
 import { useActionState } from "react";
@@ -69,10 +69,6 @@ export function Settings({ teamData }: { teamData: TeamDataWithMembers }) {
               <li key={member.id} className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <Avatar>
-                    <AvatarImage
-                      src={`/placeholder.svg?height=32&width=32`}
-                      alt={getUserDisplayName(member.user)}
-                    />
                     <AvatarFallback>
                       {getUserDisplayName(member.user)
                         .split(" ")

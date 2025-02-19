@@ -1,20 +1,20 @@
-import { z } from 'zod';
-import { TeamDataWithMembers, User } from '@/lib/db/schema';
-import { getTeamForUser, getUser } from '@/lib/db/queries';
-import { redirect } from 'next/navigation';
+import { z } from "zod";
+import { TeamDataWithMembers, User } from "@/lib/db/schema";
+import { getTeamForUser, getUser } from "@/lib/db/queries";
+import { redirect } from "next/navigation";
 
 export type ActionState = {
   error?: string;
   success?: string;
-  [key: string]: any; // This allows for additional properties
+  [key: string]: unknown;
 };
 
-type ValidatedActionFunction<S extends z.ZodType<any, any>, T> = (
+type ValidatedActionFunction<S extends z.ZodType<unknown, z.ZodTypeDef>, T> = (
   data: z.infer<S>,
   formData: FormData
 ) => Promise<T>;
 
-export function validatedAction<S extends z.ZodType<any, any>, T>(
+export function validatedAction<S extends z.ZodType<unknown, z.ZodTypeDef>, T>(
   schema: S,
   action: ValidatedActionFunction<S, T>
 ) {
@@ -28,20 +28,19 @@ export function validatedAction<S extends z.ZodType<any, any>, T>(
   };
 }
 
-type ValidatedActionWithUserFunction<S extends z.ZodType<any, any>, T> = (
-  data: z.infer<S>,
-  formData: FormData,
-  user: User
-) => Promise<T>;
+type ValidatedActionWithUserFunction<
+  S extends z.ZodType<unknown, z.ZodTypeDef>,
+  T
+> = (data: z.infer<S>, formData: FormData, user: User) => Promise<T>;
 
-export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
-  schema: S,
-  action: ValidatedActionWithUserFunction<S, T>
-) {
+export function validatedActionWithUser<
+  S extends z.ZodType<unknown, z.ZodTypeDef>,
+  T
+>(schema: S, action: ValidatedActionWithUserFunction<S, T>) {
   return async (prevState: ActionState, formData: FormData): Promise<T> => {
     const user = await getUser();
     if (!user) {
-      throw new Error('User is not authenticated');
+      throw new Error("User is not authenticated");
     }
 
     const result = schema.safeParse(Object.fromEntries(formData));
@@ -62,12 +61,12 @@ export function withTeam<T>(action: ActionWithTeamFunction<T>) {
   return async (formData: FormData): Promise<T> => {
     const user = await getUser();
     if (!user) {
-      redirect('/sign-in');
+      redirect("/sign-in");
     }
 
     const team = await getTeamForUser(user.id);
     if (!team) {
-      throw new Error('Team not found');
+      throw new Error("Team not found");
     }
 
     return action(formData, team);

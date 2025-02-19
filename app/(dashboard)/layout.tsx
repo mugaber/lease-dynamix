@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { use, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CircleIcon, Home, LogOut } from "lucide-react";
+import { CircleIcon, LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,12 +14,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/lib/auth";
 import { signOut } from "@/app/(login)/actions";
 import { useRouter } from "next/navigation";
+import { User } from "@/lib/db/schema";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const { userPromise } = useUser();
-  const user = use(userPromise);
   const router = useRouter();
+
+  useEffect(() => {
+    userPromise.then(setUser);
+  }, [userPromise]);
 
   async function handleSignOut() {
     await signOut();
@@ -29,7 +34,7 @@ function Header() {
 
   const getLogoRoute = () => {
     if (user) {
-      return "/dashboard";
+      return "/dashboard/home";
     }
     return "/";
   };

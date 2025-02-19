@@ -16,7 +16,7 @@ const fileSchema = z.object({
   path: z.string(),
 });
 
-export async function GET(request: Request) {
+export async function GET() {
   const user = await getUser();
 
   if (!user) {
