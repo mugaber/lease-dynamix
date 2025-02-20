@@ -5,6 +5,7 @@ import {
   text,
   timestamp,
   integer,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -132,6 +133,14 @@ export const filesRelations = relations(files, ({ one }) => ({
   }),
 }));
 
+export const leaseProposals = pgTable("lease_proposals", {
+  id: serial("id").primaryKey(),
+  proposalId: text("proposal_id").notNull(),
+  terms: jsonb("terms").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Team = typeof teams.$inferSelect;
@@ -149,6 +158,8 @@ export type TeamDataWithMembers = Team & {
 };
 export type File = typeof files.$inferSelect;
 export type NewFile = typeof files.$inferInsert;
+export type LeaseProposal = typeof leaseProposals.$inferSelect;
+export type NewLeaseProposal = typeof leaseProposals.$inferInsert;
 
 export enum ActivityType {
   SIGN_UP = "SIGN_UP",

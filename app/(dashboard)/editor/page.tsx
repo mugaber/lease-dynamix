@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { Delta } from "quill";
+import { LeaseProposal } from "@/lib/types/lease-proposals";
 
 async function getQuillToWord() {
   if (typeof window === "undefined") return null;
@@ -32,9 +33,26 @@ function EditorPageContent() {
 
   const [content, setContent] = useState("");
   const [newContent, setNewContent] = useState<Delta>();
+  const [proposal, setProposal] = useState<LeaseProposal | null>(null);
+
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProposal = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/leases/proposals?proposalId=001`);
+        const data = await response.json();
+        console.log(data);
+        setProposal(data as LeaseProposal);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProposal();
+  }, []);
 
   useEffect(() => {
     if (!filePath) return;
@@ -143,9 +161,9 @@ function EditorPageContent() {
     }
   };
 
-  if (loading) {
+  if (loading || !proposal) {
     return (
-      <div className="flex w-full h-full items-center justify-center p-8">
+      <div className="flex w-full h-[100dvh] items-center justify-center p-8">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
@@ -156,7 +174,7 @@ function EditorPageContent() {
     return;
   }
 
-  if (!content) {
+  if (!content && !loading) {
     return (
       <div className="flex w-full h-[calc(100dvh-4.4rem)] items-center justify-center p-8 flex-col gap-4">
         <h1 className="text-2xl font-bold">No content found</h1>
@@ -228,6 +246,7 @@ function EditorPageContent() {
         <Editor
           initialContent={content}
           onChange={(content) => setNewContent(content)}
+          leaseProposal={proposal as LeaseProposal}
         />
       </div>
     </div>

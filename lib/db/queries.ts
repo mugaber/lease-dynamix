@@ -1,8 +1,18 @@
 import { desc, and, eq, isNull } from "drizzle-orm";
 import { db } from "./drizzle";
-import { activityLogs, files, teamMembers, teams, users } from "./schema";
+import {
+  activityLogs,
+  files,
+  LeaseProposal,
+  leaseProposals,
+  teamMembers,
+  teams,
+  users,
+} from "./schema";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth/session";
+import { leaseProposal } from "../data/lease-proposal";
+import { Term } from "../types/lease-proposals";
 
 export async function getUser() {
   const sessionCookie = (await cookies()).get("session");
@@ -155,4 +165,79 @@ export async function getFilesByUserId(userId: number) {
 
 export async function deleteFile(fileId: number) {
   await db.delete(files).where(eq(files.id, fileId));
+}
+
+// Lease Proposal Queries
+
+export async function createLeaseProposal(data: LeaseProposal) {
+  return await db.insert(leaseProposals).values({
+    proposalId: data.proposalId,
+    terms: data.terms,
+  });
+}
+
+export async function getLeaseProposal(id: string) {
+  return await db.query.leaseProposals.findFirst({
+    where: (proposals, { eq }) => eq(proposals.proposalId, id),
+  });
+}
+
+export async function checkLeaseProposal(id: string) {
+  const proposal = await getLeaseProposal(id);
+  if (!proposal) {
+    return await db.insert(leaseProposals).values({
+      proposalId: id,
+      terms: leaseProposal.terms,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  return proposal;
+}
+
+export async function deleteLeaseProposal(id: string) {
+  await db.delete(leaseProposals).where(eq(leaseProposals.proposalId, id));
+}
+
+export async function updateLeaseProposalTerm({
+  proposalId,
+  termId,
+  value,
+  valueStr,
+  strikethrough,
+}: {
+  proposalId: string;
+  termId: string;
+  value: number;
+  valueStr: string;
+  strikethrough: string;
+}) {
+  const proposal = await getLeaseProposal(proposalId);
+  if (!proposal) return null;
+
+  const updatedTerms = (proposal.terms as Term[]).map((term: Term) =>
+    term.id === termId
+      ? {
+          ...term,
+          value,
+          document_edit: {
+            search_text: term.document_edit.search_text.replace(
+              strikethrough,
+              `${strikethrough} ${valueStr}`
+            ),
+            strikethrough,
+          },
+        }
+      : term
+  );
+
+  return await db
+    .update(leaseProposals)
+    .set({
+      terms: updatedTerms,
+      updatedAt: new Date(),
+    })
+    .where(eq(leaseProposals.proposalId, proposalId))
+    .returning();
 }
