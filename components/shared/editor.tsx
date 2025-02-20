@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import Quill from "quill";
+import Quill, { Delta } from "quill";
 import "quill/dist/quill.snow.css";
 import "highlight.js/styles/atom-one-dark.css";
 import "katex/dist/katex.min.css";
@@ -17,12 +17,11 @@ const toolbarOptions = [
   [{ direction: "rtl" }, { align: [] }],
   ["link", "image"],
   ["clean"],
-  ["pageBreak"],
 ];
 
 interface EditorProps {
   initialContent: string;
-  onChange: (content: string) => void;
+  onChange: (content: Delta) => void;
 }
 
 export function Editor({ initialContent, onChange }: EditorProps) {
@@ -39,7 +38,7 @@ export function Editor({ initialContent, onChange }: EditorProps) {
       });
 
       quillRef.current.on("text-change", () => {
-        onChange(quillRef.current?.root.innerHTML || "");
+        onChange(quillRef.current?.getContents() as Delta);
       });
 
       quillRef.current.root.innerHTML = initialContent;
@@ -77,6 +76,8 @@ export function Editor({ initialContent, onChange }: EditorProps) {
             border-bottom: 1px solid #e5e7eb !important;
             background: white;
             padding: 8px 15px !important;
+            display: flex;
+            justify-content: center;
           }
 
           .ql-container.ql-snow {

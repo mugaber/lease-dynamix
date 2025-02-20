@@ -65,7 +65,7 @@ export async function deleteFileFromStorage(filePath: string): Promise<void> {
 export async function getFile(filePath: string): Promise<Blob | null> {
   const { data, error } = await supabase.storage
     .from("files")
-    .download(filePath);
+    .download(`${filePath}?t=${Date.now()}`);
 
   if (error) {
     console.error("Error downloading file:", error);
@@ -73,4 +73,17 @@ export async function getFile(filePath: string): Promise<Blob | null> {
   }
 
   return data;
+}
+
+export async function updateFile(
+  filePath: string,
+  content: Uint8Array
+): Promise<void> {
+  const { error } = await supabase.storage
+    .from("files")
+    .update(`${filePath}?t=${Date.now()}`, content);
+
+  if (error) {
+    throw error;
+  }
 }

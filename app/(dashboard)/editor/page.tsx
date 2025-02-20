@@ -1,11 +1,17 @@
 "use client";
 
-import { getFile } from "@/lib/services/files";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { getFile, updateFile } from "@/lib/services/files";
+import { Loader2, ArrowLeft, Download } from "lucide-react";
 import { renderAsync } from "docx-preview";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { Delta } from "quill";
+
+async function getQuillToWord() {
+  if (typeof window === "undefined") return null;
+  return await import("quill-to-word");
+}
 
 const Editor = dynamic(
   () => import("@/components/shared/editor").then((mod) => mod.Editor),
@@ -25,10 +31,10 @@ function EditorPageContent() {
   const filePath = searchParams.get("filePath") || "";
 
   const [content, setContent] = useState("");
+  const [newContent, setNewContent] = useState<Delta>();
+  const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const saveContent = async () => {};
 
   useEffect(() => {
     if (!filePath) return;
@@ -37,7 +43,6 @@ function EditorPageContent() {
       setLoading(true);
       try {
         const contentBlob = await getFile(filePath);
-        console.log(contentBlob);
         if (!contentBlob) return;
 
         const tempDiv = document.createElement("div");
@@ -79,6 +84,64 @@ function EditorPageContent() {
     };
     fetchFileContent();
   }, [filePath]);
+
+  const saveFileChanges = useCallback(async () => {
+    setIsSaving(true);
+    try {
+      if (!newContent) return;
+
+      const quillToWord = await getQuillToWord();
+      if (!quillToWord) return;
+
+      const docxBuffer = (await quillToWord.generateWord(newContent, {
+        exportAs: "buffer" as const,
+      })) as Buffer;
+
+      await updateFile(filePath, docxBuffer);
+    } catch (error) {
+      console.error("Error saving content:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [newContent, filePath]);
+
+  useEffect(() => {
+    if (!newContent) return;
+    const timeoutId = setTimeout(saveFileChanges, 5000);
+    return () => clearTimeout(timeoutId);
+  }, [saveFileChanges, newContent]);
+
+  const downloadFile = async () => {
+    try {
+      if (!newContent) return;
+
+      const quillToWord = await getQuillToWord();
+      if (!quillToWord) return;
+
+      const docxBlob = (await quillToWord.generateWord(newContent, {
+        exportAs: "blob" as const,
+      })) as Blob;
+
+      const file = new File(
+        [docxBlob],
+        `${filePath.split("/").pop() || "document"}.docx`,
+        {
+          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        }
+      );
+
+      const url = window.URL.createObjectURL(file);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${filePath.split("/").pop() || "document"}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
+  };
 
   if (loading) {
     return (
@@ -145,19 +208,26 @@ function EditorPageContent() {
           </div>
         </div>
 
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
           <button
-            onClick={saveContent}
-            className="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm hover:bg-blue-700"
+            onClick={downloadFile}
+            className="bg-green-600 text-white px-4 py-1.5 rounded-md text-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
-            Save
+            <Download className="h-5 w-5" />
+          </button>
+          <button
+            onClick={saveFileChanges}
+            className="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            disabled={isSaving}
+          >
+            {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Save"}
           </button>
         </div>
       </header>
       <div className="relative flex-1">
         <Editor
           initialContent={content}
-          onChange={(content) => console.log(content)}
+          onChange={(content) => setNewContent(content)}
         />
       </div>
     </div>
